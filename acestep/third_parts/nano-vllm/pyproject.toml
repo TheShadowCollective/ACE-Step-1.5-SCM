@@ -9,7 +9,7 @@ authors = [{ name = "Xingkai Yu" }]
 license = {text = "MIT"}
 readme = "README.md"
 description = "a lightweight vLLM implementation built from scratch"
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.10,<3.15"
 dependencies = [
     "torch>=2.4.0",
     # Triton and Flash Attention are optional on ROCm (Python 3.12) - SDPA fallback used instead
