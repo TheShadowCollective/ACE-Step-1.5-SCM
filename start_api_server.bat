@@ -31,7 +31,7 @@ REM set ACESTEP_INIT_LLM=false
 
 REM LM model path (optional, only used when LLM is enabled)
 REM Available models: acestep-5Hz-lm-0.6B, acestep-5Hz-lm-1.7B, acestep-5Hz-lm-4B
-REM set LM_MODEL_PATH=--lm-model-path acestep-5Hz-lm-0.6B
+set LM_MODEL_PATH=--lm-model-path acestep-5Hz-lm-1.7B
 
 REM Update check on startup (set to false to disable)
 set CHECK_UPDATE=true
