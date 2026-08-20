@@ -64,6 +64,7 @@ ACE-Step SCM
     | provides the music-generation backend
     v
 ACE-Step models
+```
 
 This repository remains available separately so that the ACE-Step SCM integration
 required by The Muser SCM can be developed, tested, versioned, and maintained
