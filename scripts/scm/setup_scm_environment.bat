@@ -82,5 +82,17 @@ echo.
 echo [OK] vector-quantize compatibility patch complete.
 echo.
 
+".venv-scm\Scripts\python.exe" "scripts\scm\patch_pytorch_wavelets_resources.py"
+
+if errorlevel 1 (
+    echo.
+    echo [ERROR] pytorch-wavelets compatibility patch failed.
+    exit /b 1
+)
+
+echo.
+echo [OK] pytorch-wavelets compatibility patch complete.
+echo.
+
 endlocal
 exit /b 0

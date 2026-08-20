@@ -237,6 +237,18 @@ echo.
 echo [OK] SCM compatibility patches applied.
 echo.
 
+"%SCM_VENV%\Scripts\python.exe" "scripts\scm\patch_pytorch_wavelets_resources.py"
+
+if errorlevel 1 (
+    echo.
+    echo [ERROR] pytorch-wavelets compatibility patch failed.
+    exit /b 1
+)
+
+echo.
+echo [OK] pytorch-wavelets compatibility patch complete.
+echo.
+
 REM ------------------------------------------------------------
 REM Validate installed SCM stack
 REM ------------------------------------------------------------

@@ -77,10 +77,13 @@ REM ------------------------------------------------------------
 REM Launch API using the SCM Python environment explicitly
 REM ------------------------------------------------------------
 
+if not defined ACESTEP_CONFIG_PATH set "ACESTEP_CONFIG_PATH=acestep-v15-turbo"
+if not defined ACESTEP_LM_MODEL_PATH set "ACESTEP_LM_MODEL_PATH=acestep-5Hz-lm-1.7B"
+
 ".venv-scm\Scripts\acestep-api.exe" ^
     --host %HOST% ^
     --port %PORT% ^
-    --lm-model-path acestep-5Hz-lm-1.7B
+    --lm-model-path %ACESTEP_LM_MODEL_PATH%
 
 set EXIT_CODE=%ERRORLEVEL%
 
