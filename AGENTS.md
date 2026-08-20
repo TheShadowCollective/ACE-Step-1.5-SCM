@@ -1,186 +1,267 @@
-# AGENTS.md
+# AGENTS.md — ACE-Step SCM
 
-Guidance for AI coding agents working in `ace-step/ACE-Step-1.5`.
+This file provides instructions for AI coding agents working on
+**ACE-Step SCM**.
 
-This document is aligned with the intent from:
-- Discussion #408: functional decomposition to reduce risk from large mixed-responsibility files.
-- Discussion #365: low-risk contribution workflow, minimal scope, and review rigor.
+ACE-Step SCM is a maintained fork of the original ACE-Step project created
+specifically to support **The Muser SCM**.
 
-## Primary Objectives
+The primary goal of work in this repository is to maintain a known, tested,
+and reliable ACE-Step backend for The Muser SCM while disturbing unrelated
+upstream ACE-Step behavior as little as possible.
 
-1. Keep changes safe and reviewable.
-2. Prefer small, maintainable, decomposed modules.
-3. Preserve behavior outside the target fix.
-4. Validate with focused Python unit tests.
 
-## Build, Lint, and Test Commands
+## Project Relationship
 
-```bash
-# Install dependencies
-uv sync
+The relationship between the projects is:
 
-# Run all tests (unittest-based, discovery in */*_test.py and test_*.py)
-uv run python -m unittest discover -s . -p "*_test.py"
-uv run python -m unittest discover -s . -p "test_*.py"
+```text
+The Muser SCM
+    |
+    | installs and manages
+    v
+ACE-Step SCM
+    |
+    | loads and runs
+    v
+ACE-Step models
 
-# Run a single test file
-uv run python -m unittest acestep.training.test_lora_utils
+ACE-Step and its models, architecture, research, and original
+implementation are upstream work created by the ACE-Step developers and
+contributors.
 
-# Run a specific test class
-uv run python -m unittest acestep.training.test_lora_utils.TestUnwrapDecoder
+ACE-Step SCM contains compatibility, integration, environment-management,
+and maintenance changes required by The Muser SCM.
 
-# Run a single test method
-uv run python -m unittest acestep.training.test_lora_utils.TestUnwrapDecoder.test_returns_module_directly
+Agents must not treat ACE-Step SCM as a replacement for the original ACE-Step
+project or assume that SCM-specific requirements apply to upstream ACE-Step.
 
-# Run all tests in a directory
-uv run python -m unittest discover -s acestep/training -p "*_test.py"
+
+## Primary Agent Rule
+
+When making changes to ACE-Step SCM:
+> Make the smallest change necessary to solve the specific SCM problem while
+> preserving unrelated upstream behavior.
+
+Do not perform opportunistic refactors, dependency upgrades, formatting
+changes, architecture changes, or cleanup outside the scope of the requested
+work.
+
+Changes affecting non-target hardware, operating systems, runtime paths, or
+upstream functionality must not be made unless they are genuinely required
+for the SCM task.
+
+
+## Validated SCM Environment
+
+The validated ACE-Step SCM development environment currently uses:
+
+- **Operating system:** Windows 11
+- **Python:** 3.14
+- **PyTorch:** 2.13.0 + CUDA 13.0
+- **GPU:** NVIDIA GeForce RTX 5060 Ti
+- **VRAM:** 16 GB
+- **Environment:** `.venv-scm`
+
+Agents working on SCM-specific changes should use the repository's dedicated
+SCM environment rather than creating or substituting an unrelated Python
+environment.
+
+The SCM environment is prepared from the repository root with:
+
+```bat
+scripts\scm\bootstrap_scm_environment.bat
 ```
 
-## Scope and Change Control (Required)
+Do not replace the SCM bootstrap procedure with the original upstream
+`uv sync` workflow when validating SCM-specific changes.
 
-- Solve one problem per task/PR.
-- Keep edits minimal: touch only files/functions required for the requested change.
-- Do not make drive-by refactors, formatting sweeps, or opportunistic cleanups.
-- Do not alter non-target hardware/runtime paths (CPU/CUDA/MPS/XPU) unless required by the task.
-- If any cross-path change is necessary, isolate it and justify it in the PR notes.
-- Preserve existing public interfaces unless the task explicitly requires an interface change.
+The original ACE-Step project supports additional operating systems, hardware
+backends, Python environments, and development workflows. Those upstream
+configurations are outside The Shadow Collective's validated SCM environment
+unless explicitly tested as part of the task.
 
-## Decomposition and Module Size Policy
-
-- Prefer single-responsibility modules with clear boundaries.
-- Target module size:
-  - Optimal: `<= 150` LOC
-  - Hard cap: `200` LOC
-- Function decomposition rules:
-  - Do one thing at a time; if a function description naturally contains "and", split it.
-  - Split by responsibility, not by convenience.
-  - Keep data flow explicit (`data in, data out`); side effects must be obvious and deliberate.
-  - Push decisions up and push work down (orchestration at higher layers, execution details in lower layers).
-  - The call graph should read clearly from top-level orchestration to leaf operations.
-- If a module would exceed `200` LOC:
-  - Split by responsibility before merging, or
-  - Add a short justification in PR notes and include a concrete follow-up split plan.
-- Keep orchestrator/facade modules thin. Move logic into focused helpers/services.
-- Preserve stable facade imports when splitting large files so external callers are not broken.
-
-## Python Unit Testing Expectations
-
-- Add or update tests for every behavior change and bug fix.
-- Match repository conventions:
-  - Use `unittest`-style tests.
-  - Name test files as `*_test.py` or `test_*.py`.
-- Keep tests deterministic, fast, and scoped to changed behavior.
-- Use `unittest.mock.MagicMock` and `unittest.mock.patch` for mocking.
-- Mock GPU, filesystem, network, and external services where possible.
-- If a change requires mocking a large portion of the system to test one unit, treat that as a decomposition smell and refactor boundaries.
-- Include at least:
-  - One success-path test.
-  - One regression/edge-case test for the bug being fixed.
-  - One non-target behavior check when relevant.
-- Run targeted tests locally before submitting.
-
-## Code Style Guidelines
-
-- **Python version**: 3.11-3.12
-- **Indentation**: 4 spaces (no tabs)
-- **Line length**: Maximum 100 characters (recommended). See `pyproject.toml` for configured formatter limits. Exceptions allowed for URLs and long strings where wrapping would hurt readability.
-- **Strings**: Double quotes `"` preferred
-- **Imports**: Group by type (stdlib, third-party, local), sort alphabetically within groups
-
-```python
-# Example import ordering
-import os
-import tempfile
-from pathlib import Path
-from typing import Any
-from unittest.mock import MagicMock, patch
-
-import torch
-import torch.nn as nn
-
-from acestep.training.lora_injection import inject_lora_into_dit
+Do not infer that an SCM compatibility change is appropriate for other
+upstream platforms merely because it works in the validated SCM environment.
 ```
 
-**Naming conventions**:
-- `snake_case` for functions, variables, and module names
-- `PascalCase` for classes
-- `UPPER_SNAKE_CASE` for constants
-- Prefix private/internal names with underscore: `_internal_func`, `_private_var`
+## SCM Development Priorities
 
-**Type hints**: Add type annotations for new/modified functions when practical.
+Work in ACE-Step SCM should primarily support the requirements of
+**The Muser SCM**.
 
-**Docstrings**: Mandatory for all modules, classes, and public functions. Use concise format:
+Typical SCM work includes:
 
-```python
-def inject_lora_into_dit(
-    dit: nn.Module,
-    config: dict[str, Any],
-    target_modules: list[str],
-) -> nn.Module:
-    """Inject LoRA adapters into DiT model for parameter-efficient fine-tuning.
+- Python and dependency compatibility required by the validated SCM stack
+- Compatibility fixes for libraries used by ACE-Step SCM
+- SCM environment bootstrap and installation reliability
+- ACE-Step REST API integration required by The Muser SCM
+- GPU detection and hardware-aware configuration
+- Model loading and runtime compatibility
+- Startup, shutdown, and service-management behavior used by The Muser SCM
+- Fixes required to keep the validated SCM generation workflow operational
 
-    Args:
-        dit: The Diffusion Transformer model to modify.
-        config: LoRA configuration dictionary.
-        target_modules: List of module names to apply LoRA to.
+The following are not automatically SCM development goals:
 
-    Returns:
-        The modified DiT model with LoRA adapters injected.
-    """
-```
+- General modernization of unrelated upstream ACE-Step code
+- Refactoring code solely for style or architectural preference
+- Expanding support to hardware or operating systems we cannot validate
+- Replacing upstream systems that already function for the SCM workflow
+- Changing ACE-Step model architecture or behavior without a demonstrated
+  requirement from The Muser SCM
+- Adopting new dependency versions simply because newer versions exist
 
-**Error handling**:
-- Avoid bare `except:` clauses; catch specific exceptions
-- Use custom exceptions for domain errors
-- Log errors with `loguru.logger` (not `print()`)
-- Let exceptions propagate for truly exceptional conditions
+When a problem can be solved either by a narrowly scoped compatibility patch
+or by changing a larger portion of the upstream architecture, prefer the
+narrowly scoped solution unless there is a demonstrated reason not to.
 
-**Logging**:
-- Use `from loguru import logger` and `logger.info()`, `logger.error()`, etc.
-- Keep logs actionable and debug-level for development
-- Avoid `print()` in committed code except CLI output
+If a requested change would significantly alter original ACE-Step behavior,
+agents should identify that risk before making the change.
 
-**Multi-platform support** (CUDA, ROCm, Intel XPU, MPS, MLX, CPU):
-- Use `gpu_config.py` for hardware detection
-- Do not alter non-target platform paths unless explicitly required
-- Changes to CUDA code should not break MPS/XPU/CPU paths
 
-## Feature Gating and WIP Safety
+## Validation Requirements
 
-- Do not expose unfinished or non-functional user-facing flows by default.
-- Gate WIP or unstable UI/API paths behind explicit feature/release flags.
-- Keep default behavior stable; "coming soon" paths must not appear as usable functionality unless they are operational and tested.
+A successful import, dependency installation, or API startup does not by
+itself prove that an ACE-Step SCM change is valid.
 
-## Python Coding Best Practices
+Validation should match the scope of the change.
 
-- Use explicit, readable code over clever shortcuts.
-- Docstrings are mandatory for all new or modified Python modules, classes, and functions.
-- Docstrings must be concise and include purpose plus key inputs/outputs (and raised exceptions when relevant).
-- Add type hints for new/modified functions when practical.
-- Keep functions focused and short; extract helpers instead of nesting complexity.
-- Use clear names that describe behavior, not implementation trivia.
-- Prefer pure functions for logic-heavy paths where possible.
-- Avoid duplicated logic, but do not introduce broad abstractions too early; prefer simple local duplication over unstable premature abstraction.
-- Handle errors explicitly; avoid bare `except`.
-- Keep logging actionable; avoid noisy logs and `print` debugging in committed code.
-- Avoid hidden state and unintended side effects.
-- Write comments only where intent is non-obvious; keep comments concise and technical.
+For SCM-specific changes, agents should use the following progression where
+applicable:
 
-## AI-Agent Workflow (Recommended)
+1. Verify that the affected code imports or initializes successfully.
+2. Verify that the dedicated `.venv-scm` environment remains functional.
+3. Verify that the ACE-Step SCM REST API starts successfully when the change
+   affects runtime or API behavior.
+4. Verify that the affected model or hardware configuration loads correctly.
+5. When generation behavior may be affected, complete an actual music
+   generation.
+6. When The Muser SCM integration may be affected, validate the workflow
+   through The Muser SCM rather than testing ACE-Step SCM only in isolation.
 
-1. Understand the task and define explicit in-scope/out-of-scope boundaries.
-2. Propose a minimal patch plan before editing.
-3. Implement the smallest viable change.
-4. Add/update focused tests.
-5. Self-review only changed hunks for regressions and scope creep.
-6. Summarize risk, validation, and non-target impact in PR notes.
+Do not describe a change as fully validated when only a lower-level check has
+been completed.
 
-## PR Readiness Checklist
+For example:
 
-- [ ] Change is tightly scoped to one problem.
-- [ ] Non-target paths are unchanged, or changes are explicitly justified.
-- [ ] New/updated tests cover changed behavior and edge cases.
-- [ ] No unrelated refactor/formatting churn.
-- [ ] Required docstrings are present for all new/modified modules, classes, and functions.
-- [ ] WIP/unstable functionality is feature-flagged and not exposed as default-ready behavior.
-- [ ] Module LOC policy is met (`<=150` target, `<=200` hard cap or justified exception).
+- Successful installation proves installation, not generation.
+- Successful import proves import compatibility, not runtime compatibility.
+- Successful API startup proves service startup, not successful inference.
+- Successful ACE-Step SCM generation does not necessarily prove that
+  The Muser SCM integration remains functional.
+
+Report exactly what was tested and what was not tested.
+
+If validation cannot be completed because the required hardware, model,
+environment, or integration is unavailable, state that limitation rather
+than assuming the change works.
+
+
+## Change and Review Rules
+
+Agents working on ACE-Step SCM should keep changes narrow, reviewable, and
+easy to validate.
+
+### Before Making Changes
+
+- Identify the specific problem being solved.
+- Determine which files and runtime paths are actually involved.
+- Check whether the affected code is SCM-specific or inherited upstream code.
+- Identify any non-target hardware, operating system, or runtime paths that
+  could be affected.
+- Prefer understanding the existing implementation before replacing it.
+
+### While Making Changes
+
+- Modify only the files and functions required for the task.
+- Do not perform unrelated refactoring or formatting cleanup.
+- Preserve existing interfaces unless the requested fix requires a change.
+- Keep SCM-specific compatibility logic isolated where practical.
+- Do not alter CPU, MPS, XPU, ROCm, or other non-target paths merely to make
+  the validated NVIDIA SCM path cleaner.
+- Do not remove apparently unused upstream functionality without first
+  establishing that it is genuinely unnecessary to the inherited project.
+
+### After Making Changes
+
+- Review the complete diff for unintended changes.
+- Confirm that the change remained within the requested scope.
+- Run validation appropriate to the affected behavior.
+- Check for regressions in adjacent code paths where practical.
+- Record any known limitations or untested paths.
+- Clearly distinguish pre-existing issues from problems introduced by the
+  current change.
+
+### Review Discipline
+
+When using multiple AI coding or review agents, a review agent should examine
+the actual change or commit diff rather than broadly rewriting unrelated
+parts of the repository.
+
+Review findings should be classified as:
+
+- **Accepted** — a valid issue introduced or exposed by the change
+- **Rebutted** — an incorrect or out-of-scope finding
+- **Pre-existing** — an issue that existed before the current change
+
+Accepted findings should be fixed with the smallest reasonable patch and
+validation should be repeated as necessary.
+
+
+## Upstream Boundary and Attribution
+
+ACE-Step SCM is derived from the original ACE-Step project.
+
+Agents must preserve the distinction between:
+
+- **ACE-Step** — the original upstream project
+- **ACE-Step SCM** — The Shadow Collective's maintained compatibility fork
+- **The Muser** — the original Muser project
+- **The Muser SCM** — The Shadow Collective's maintained Muser fork
+
+Do not describe original ACE-Step models, architecture, research, or
+implementation as work created by The Shadow Collective.
+
+Do not rename upstream ACE-Step models or components merely to apply SCM
+branding.
+
+When documentation or code comments discuss an SCM-specific modification,
+make the scope of that modification clear without implying that the
+underlying upstream component was created by The Shadow Collective.
+
+Preserve existing copyright, license, attribution, and third-party notices.
+
+For original ACE-Step development, documentation, and project direction,
+refer to the upstream repository:
+
+https://github.com/ace-step/ACE-Step-1.5
+
+
+## Source of Truth
+
+When information about the ACE-Step SCM environment conflicts, prefer
+evidence from the currently validated SCM implementation over assumptions
+based on the original upstream environment.
+
+Use the following order when determining intended SCM behavior:
+
+1. The specific requirements of the current task
+2. Working ACE-Step SCM code and SCM-specific scripts
+3. The validated `.venv-scm` environment
+4. The Muser SCM integration that consumes ACE-Step SCM
+5. ACE-Step SCM documentation
+6. Original upstream ACE-Step documentation for functionality not modified
+   by the SCM fork
+
+Do not change a working SCM configuration solely because upstream
+documentation describes a different environment.
+
+Likewise, do not modify unrelated upstream behavior solely to make it conform
+to SCM-specific assumptions.
+
+When the implementation, documentation, and observed runtime behavior
+disagree, investigate the discrepancy before making changes rather than
+assuming that any single source is automatically correct.
+
+If uncertainty remains, preserve the existing working behavior and clearly
+report the unresolved discrepancy.

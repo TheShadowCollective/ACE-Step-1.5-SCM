@@ -1,12 +1,84 @@
-Hopefully this will provide a simple, easy to understand guide to making safe contributions to the project, happy coding!
+# Contributing to ACE-Step
+Hopefully this will provide a simple, easy to understand guide to making 
+safe contributions to the project, happy coding!
+
+
+## ACE-Step SCM Contribution Scope
+
+ACE-Step SCM is a maintained fork of the original ACE-Step project created
+specifically to support **The Muser SCM**.
+
+Contributions to this repository should therefore be evaluated primarily in
+the context of compatibility, integration, environment management, and
+maintenance required by The Muser SCM.
+
+The broader ACE-Step project supports platforms, environments, and workflows
+that are not validated by The Shadow Collective. Where possible, SCM-specific
+changes should remain isolated and avoid altering unrelated upstream behavior.
+
+For contributions to the original ACE-Step project itself, including broader
+platform support and upstream features, contributors should refer to the
+original ACE-Step repository:
+
+https://github.com/ace-step/ACE-Step-1.5
+
+
+## SCM Development Environment
+
+ACE-Step SCM development should use the dedicated SCM environment provided by
+this repository.
+
+The validated SCM environment currently uses:
+
+- Python 3.14
+- PyTorch 2.13.0 + CUDA 13.0
+- The repository's dedicated `.venv-scm` environment
+
+From the ACE-Step SCM repository root, prepare the development environment with:
+
+```bat
+scripts\scm\bootstrap_scm_environment.bat
+```
+
+Contributors working on SCM-specific compatibility or integration changes
+should use this environment when reproducing issues and validating changes.
+
+Do not assume that the original ACE-Step development environment and the
+ACE-Step SCM environment are interchangeable. The SCM dependency stack
+contains compatibility work maintained specifically for The Muser SCM.
+
+Changes that affect dependency versions, environment bootstrap, model loading,
+hardware detection, or API behavior should also be validated through
+The Muser SCM integration whenever practical.
+
+
+### Upstream Development Instructions
+
+The development instructions below originate from the original ACE-Step
+project and are retained for reference when working with inherited upstream
+code and workflows.
+
+They are **not the validated setup procedure for ACE-Step SCM**.
+
+For SCM-specific development, compatibility work, and The Muser SCM
+integration, use the `.venv-scm` environment and SCM bootstrap procedure
+described above.
+
+Commands, Python versions, dependency versions, and platform-specific
+instructions in the upstream sections may differ from the environment
+validated by The Shadow Collective.
 
 
 ## Why This Matters
 
-This project supports **many hardware and runtime combinations**.
-A change that works perfectly on one setup can unintentionally break another if scope is not tightly controlled.
+The original ACE-Step project supports **many hardware and runtime combinations**.
+A change that works perfectly on one setup can unintentionally break another if 
+scope is not tightly controlled.
 
-The project has kind of gone viral, and has thousands of users, amateur, semi professional and professional, technical and none technical, it is important that Ace-Step has reliable builds to maintain user trust and engagement.
+The original ACE-Step project has kind of gone viral, and has thousands 
+of users, amateur, semi professional and professional, technical and 
+none technical, it is important that Ace-Step has reliable builds to 
+maintain user trust and engagement.
 
 Recent PR patterns have shown avoidable regressions, for example:
 
@@ -158,7 +230,14 @@ This keeps discussion **objective, fast, and easy to follow**.
 - Known pre-existing issues not addressed
 - Follow-up items (if any)
 
-Your PR description should look something like [this](https://github.com/ace-step/ACE-Step-1.5/pull/309), demonstrating care and rigor applied by the author before hitting the PR button. If you have multiple Coderabbit/copilot responses to your PR, its probably a good idea to revoke the PR, fix the issues raised by the review bot, and resubmit.
+For an example of a carefully documented pull request, see this
+[upstream ACE-Step PR](https://github.com/ace-step/ACE-Step-1.5/pull/309),
+which demonstrates the care and rigor encouraged by the original ACE-Step
+maintainers before submitting a PR.
+
+If automated reviewers such as CodeRabbit or Copilot identify significant
+issues, address those findings and repeat the review process before considering
+the contribution ready for submission.
 
 ---
 

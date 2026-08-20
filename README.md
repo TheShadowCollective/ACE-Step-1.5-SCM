@@ -1,327 +1,325 @@
-<h1 align="center">ACE-Step 1.5</h1>
-<h1 align="center">Pushing the Boundaries of Open-Source Music Generation</h1>
-<p align="center">
-    <a href="https://acemusic.ai">ACEMusic</a> |
-    <a href="https://ace-step.github.io/ace-step-v1.5.github.io/">Project</a> |
-    <a href="https://huggingface.co/ACE-Step/Ace-Step1.5">Hugging Face</a> |
-    <a href="https://modelscope.cn/models/ACE-Step/Ace-Step1.5">ModelScope</a> |
-    <a href="https://huggingface.co/spaces/ACE-Step/Ace-Step-v1.5">Space Demo</a> |
-    <a href="https://discord.gg/PeWDxrkdj7">Discord</a> |
-    <a href="https://arxiv.org/abs/2602.00744">Technical Report</a> |
-    <a href="https://github.com/ace-step/awesome-ace-step">Awesome ACE-Step</a>
-</p>
+# ACE-Step SCM 1.6
 
-<p align="center">
-    <img src="./assets/organization_logos.png" height="80" alt="StepFun Logo" style="vertical-align: middle;">
-    &nbsp;&nbsp;
-    <a href="https://acemusic.ai">
-        <img src="./assets/acemusic-logo.svg" height="57" alt="ACEMusic - Try ACE-Step Online" style="vertical-align: middle; position: relative; top: 2px;">
-    </a>
-</p>
+### The Muser's maintained ACE-Step compatibility fork
 
-## 📰 News
-
-> 🎵 **Want a faster & more stable experience? Try [acemusic.ai](https://acemusic.ai) — 100% free!**
-
-- **[2026-04-02] 🎉 ACE-Step 1.5 XL (4B DiT) Released!** — We introduce the XL series with a 4B-parameter DiT decoder for higher audio quality. Three variants available: [xl-base](https://huggingface.co/ACE-Step/acestep-v15-xl-base), [xl-sft](https://huggingface.co/ACE-Step/acestep-v15-xl-sft), [xl-turbo](https://huggingface.co/ACE-Step/acestep-v15-xl-turbo). Requires ≥12GB VRAM (with offload), ≥20GB recommended. All LM models fully compatible. See [Model Zoo](#-model-zoo) for details.
-
-## Table of Contents
-
-- [📰 News](#-news)
-- [✨ Features](#-features)
-- [⚡ Quick Start](#-quick-start)
-- [🚀 Launch Scripts](#-launch-scripts)
-- [📚 Documentation](#-documentation)
-- [📖 Tutorial](#-tutorial)
-- [🏗️ Architecture](#️-architecture)
-- [🦁 Model Zoo](#-model-zoo)
-- [🔬 Benchmark](#-benchmark)
-
-## 📝 Abstract
-🚀 We present ACE-Step v1.5, a highly efficient open-source music foundation model that brings commercial-grade generation to consumer hardware. On commonly used evaluation metrics, ACE-Step v1.5 achieves quality beyond most commercial music models while remaining extremely fast—under 2 seconds per full song on an A100 and under 10 seconds on an RTX 3090. The model runs locally with less than 4GB of VRAM, and supports lightweight personalization: users can train a LoRA from just a few songs to capture their own style.
-
-🌉 At its core lies a novel hybrid architecture where the Language Model (LM) functions as an omni-capable planner: it transforms simple user queries into comprehensive song blueprints—scaling from short loops to 10-minute compositions—while synthesizing metadata, lyrics, and captions via Chain-of-Thought to guide the Diffusion Transformer (DiT). ⚡ Uniquely, this alignment is achieved through intrinsic reinforcement learning relying solely on the model's internal mechanisms, thereby eliminating the biases inherent in external reward models or human preferences. 🎚️
-
-🔮 Beyond standard synthesis, ACE-Step v1.5 unifies precise stylistic control with versatile editing capabilities—such as cover generation, repainting, and vocal-to-BGM conversion—while maintaining strict adherence to prompts across 50+ languages. This paves the way for powerful tools that seamlessly integrate into the creative workflows of music artists, producers, and content creators. 🎸
+> [!IMPORTANT]
+> **ACE-Step SCM is not a standalone Shadow Collective music-generation project.**
+>
+> This repository is a maintained fork of the original
+> [ACE-Step 1.5](https://github.com/ace-step/ACE-Step-1.5) project, created
+> specifically to provide a compatible and reliable ACE-Step backend for
+> **The Muser SCM**.
+>
+> Users of **The Muser SCM** should not need to install this repository directly.
+> The Muser SCM's installation and startup system downloads, configures, and
+> manages the compatible ACE-Step SCM environment automatically.
 
 
-## ✨ Features
+## Upstream Credit
 
-<p align="center">
-    <img src="./assets/application_map.png" width="100%" alt="ACE-Step Framework">
-</p>
+**ACE-Step was created by the ACE-Step team and is co-led by ACE Studio and StepFun.**
 
-### ⚡ Performance
-- ✅ **Ultra-Fast Generation** — Under 2s per full song on A100, under 10s on RTX 3090 (0.5s to 10s on A100 depending on think mode & diffusion steps)
-- ✅ **Flexible Duration** — Supports 10 seconds to 10 minutes (600s) audio generation
-- ✅ **Batch Generation** — Generate up to 8 songs simultaneously
+The original ACE-Step project, model architecture, research, models, and
+core implementation belong to their respective original authors and
+contributors. The Shadow Collective did not create ACE-Step.
 
-### 🎵 Generation Quality
-- ✅ **Commercial-Grade Output** — Quality beyond most commercial music models (between Suno v4.5 and Suno v5)
-- ✅ **Rich Style Support** — 1000+ instruments and styles with fine-grained timbre description
-- ✅ **Multi-Language Lyrics** — Supports 50+ languages with lyrics prompt for structure & style control
+Original project:
 
-### 🎛️ Versatility & Control
+**https://github.com/ace-step/ACE-Step-1.5**
 
-| Feature | Description |
-|---------|-------------|
-| ✅ Reference Audio Input | Use reference audio to guide generation style |
-| ✅ Cover Generation | Create covers from existing audio |
-| ✅ Repaint & Edit | Selective local audio editing and regeneration |
-| ✅ Track Separation | Separate audio into individual stems |
-| ✅ Multi-Track Generation | Add layers like Suno Studio's "Add Layer" feature |
-| ✅ Vocal2BGM | Auto-generate accompaniment for vocal tracks |
-| ✅ Metadata Control | Control duration, BPM, key/scale, time signature |
-| ✅ Simple Mode | Generate full songs from simple descriptions |
-| ✅ Query Rewriting | Auto LM expansion of tags and lyrics |
-| ✅ Audio Understanding | Extract BPM, key/scale, time signature & caption from audio |
-| ✅ LRC Generation | Auto-generate lyric timestamps for generated music |
-| ✅ LoRA Training | One-click annotation & training in Gradio. 8 songs, 1 hour on 3090 (12GB VRAM) |
-| ✅ Quality Scoring | Automatic quality assessment for generated audio |
+Original ACE-Step 1.5 research citation:
 
-## 🔔 Staying ahead
-Star ACE-Step on GitHub and be instantly notified of new releases
-![](assets/star.gif)
+> Junmin Gong, Yulin Song, Wenxiao Zhao, Sen Wang, Shengyuan Xu, and Jing Guo.
+> *ACE-Step 1.5: Pushing the Boundaries of Open-Source Music Generation* (2026).
 
-## 🤝 Partners
+ACE-Step SCM is forked on this repository because The Muser SCM depends on ACE-Step
+and requires a known, tested version that can evolve alongside The Muser SCM's runtime
+and integration requirements.
 
-<p align="center">
-    <a href="https://www.comfy.org/"><img src="https://registry.comfy.org/_next/static/media/logo_blue.9ac227d3.png" alt="ComfyUI" height="40" style="margin: 5px;"></a>
-    <a href="https://zilliz.com/"><img src="https://avatars.githubusercontent.com/u/18416694" alt="Zilliz" height="40" style="margin: 5px;"></a>
-    <a href="https://milvus.io/"><img src="https://miro.medium.com/v2/resize:fit:2400/1*-VEGyAgcIBD62XtZWavy8w.png" alt="Milvus" height="40" style="margin: 5px;"></a>
-    <a href="https://zeabur.com/"><img src="https://zeabur.notion.site/image/attachment%3A43bc244b-9a2d-4b96-9646-8392aa6fc862%3Alogo-dark_1.svg?table=block&id=318a221c-948e-8056-b3c0-f9c39ce543ba&spaceId=ba37aeb9-0937-401d-aa41-ce1d3b6ff778&userId=&cache=v2" alt="Zeabur" height="40" width="40" style="margin: 5px;"></a>
-    <a href="https://majiks.studio"><img src="https://raw.githubusercontent.com/Majiks-Studio/majiks-brand-kit/main/logos/app-icon/png/app-icon-128.png" alt="Majik's Music Studio" height="40" width="40" style="margin: 5px;"></a>
-</p>
+The Shadow Collective's work in this repository is focused on compatibility,
+integration, environment management, and maintenance required by The Muser SCM.
 
-## ⚡ Quick Start
 
-> 🎵 **Don't want to install locally? Try [acemusic.ai](https://acemusic.ai) — 100% free, no GPU required!**
+## Relationship to The Muser SCM
 
-> **Requirements:** Python 3.11-3.12, CUDA GPU recommended (also supports MPS / ROCm / Intel XPU / CPU)
-> 
-> **Note:** ROCm on Windows requires Python 3.12 (AMD officially provides Python 3.12 wheels only)
+ACE-Step SCM is a backend dependency of **The Muser SCM**.
 
-```bash
-# 1. Install uv
-curl -LsSf https://astral.sh/uv/install.sh | sh          # macOS / Linux
-# powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"  # Windows
+The Muser SCM provides the user-facing installation and orchestration workflow.
+During first-time setup, `Start_Muser.bat` obtains and prepares the compatible
+ACE-Step SCM version required for music generation.
 
-# 2. Clone & install
-git clone https://github.com/ACE-Step/ACE-Step-1.5.git
-cd ACE-Step-1.5
-uv sync
+Users installing The Muser SCM therefore should **not clone or configure
+ACE-Step SCM separately**. Its environment, dependencies, models, compatibility
+patches, and API startup are managed as part of The Muser SCM workflow.
 
-# 3. Launch Gradio UI (models auto-download on first run)
-uv run acestep
+The normal relationship is:
 
-# Or launch REST API server
-uv run acestep-api
+```text
+The Muser SCM
+    |
+    | installs and manages
+    v
+ACE-Step SCM
+    |
+    | provides the music-generation backend
+    v
+ACE-Step models
+
+This repository remains available separately so that the ACE-Step SCM integration
+required by The Muser SCM can be developed, tested, versioned, and maintained
+without modifying or depending upon the release schedule of the original
+ACE-Step project.
+
+
+## SCM Modernization
+
+ACE-Step SCM preserves the original ACE-Step architecture while maintaining
+the compatibility layer required by The Muser SCM.
+
+The current SCM environment has been modernized and validated with:
+
+- **Python 3.14**
+- **PyTorch 2.13.0 + CUDA 13.0**
+- **Transformers 5.x**
+- **torchao 0.18.0**
+- **vector-quantize-pytorch 1.31.1**
+- **accelerate 1.14.0**
+- **safetensors 0.8.0**
+
+Additional SCM compatibility work includes:
+
+- TorchAO PyTree enum compatibility
+- `vector-quantize-pytorch` meta-device compatibility
+- `pytorch-wavelets` modern `importlib.resources` compatibility
+- Dedicated SCM environment bootstrap and validation
+- ACE-Step REST API startup for The Muser SCM integration
+- GPU detection and hardware-aware model selection
+
+These changes are maintained specifically for the validated SCM workflow.
+They should not be interpreted as replacements for the broader platform
+support, installation methods, or development direction of the original
+ACE-Step project.
+
+## Why This Fork Exists
+
+The Shadow Collective's SCM projects are being developed in support of a
+personal AI-assisted fan-fiction art project.
+
+The software work in this repository grew out of practical production needs.
+When the existing software stack could not provide the environment,
+compatibility, integration, or workflow required by the project, we modified
+it so that the creative work could continue.
+
+Those modifications are shared publicly in the hope that they may also be
+useful to others, but **ACE-Step SCM is not intended to replace the original
+ACE-Step project or redefine its supported platforms and workflows**.
+
+Our development priority is the hardware and software environment used for
+The Shadow Collective's own production work. We test ACE-Step SCM as part of
+The Muser SCM workflow on our own hardware and make no guarantee that SCM
+changes will behave as the original ACE-Step developers intended on other
+hardware, operating systems, configurations, or workflows.
+
+Where possible, SCM changes are kept isolated from the original ACE-Step
+architecture so that upstream functionality is disturbed as little as
+possible.
+
+For general-purpose ACE-Step installation, platform support, documentation,
+and development, users should refer to the original ACE-Step project:
+
+https://github.com/ace-step/ACE-Step-1.5
+
+
+## Validated Environment
+
+ACE-Step SCM is developed and tested as part of The Muser SCM workflow on
+The Shadow Collective's production hardware.
+
+Current validated configuration:
+
+- **Operating system:** Windows
+- **GPU:** NVIDIA GeForce RTX 5060 Ti
+- **VRAM:** 16 GB
+- **CUDA:** 13.0
+- **Python:** 3.14
+- **PyTorch:** 2.13.0 + cu130
+
+For The Muser SCM workflow, we recommend an **NVIDIA GPU with 16 GB of VRAM
+or more**.
+
+This is a recommendation based on the hardware used to develop and validate
+the SCM integration. It is **not a statement of the minimum hardware
+requirements of the original ACE-Step project**.
+
+Other GPUs, VRAM capacities, operating systems, and hardware backends may
+work, particularly where they are supported by upstream ACE-Step, but they
+have not been validated by The Shadow Collective for the SCM workflow.
+
+The Shadow Collective cannot guarantee compatibility or provide equivalent
+validation for hardware and software configurations that we do not have
+available for testing.
+
+
+## For The Muser SCM Users
+
+If you are using **The Muser SCM**, you do not need to install ACE-Step SCM
+manually.
+
+Install and start The Muser SCM using its normal startup workflow:
+
+```bat
+Start_Muser.bat
 ```
 
-Open http://localhost:7860 (Gradio) or http://localhost:8001 (API).
+The Muser SCM will automatically:
 
-> 📦 **Windows users:** A [portable package](https://files.acemusic.ai/acemusic/win/ACE-Step-1.5.7z) with pre-installed dependencies is available. See [Installation Guide](./docs/en/INSTALL.md#-windows-portable-package).
+- Detect whether the required ACE-Step SCM installation is present
+- Download the compatible ACE-Step SCM repository when required
+- Create and prepare its dedicated SCM Python environment
+- Install the validated dependencies and compatibility patches
+- Detect the available GPU configuration
+- Select the appropriate ACE-Step model configuration
+- Start the ACE-Step SCM REST API when required
 
-> 📦 **MacOS users:** A [portable package](https://files.acemusic.ai/acemusic/mac/ACE-Step-1.5.zip) with pre-installed dependencies is available. See [Installation Guide](./docs/en/INSTALL.md#-macos-portable-package).
+ACE-Step SCM is intentionally maintained as a managed dependency so that
+users of The Muser SCM do not need to maintain a separate ACE-Step
+installation or reproduce its compatibility environment themselves.
 
-> 📖 **Full installation guide** (AMD/ROCm, Intel GPU, CPU, environment variables, command-line options): [English](./docs/en/INSTALL.md) | [中文](./docs/zh/INSTALL.md) | [日本語](./docs/ja/INSTALL.md)
+If ACE-Step SCM is already installed and ready, The Muser SCM reuses the
+existing installation rather than rebuilding it during every startup.
 
-### 💡 Which Model Should I Choose?
 
-| Your GPU VRAM | Recommended DiT | Recommended LM Model | Backend | Notes |
-|---------------|----------------|---------------------|---------|-------|
-| **≤6GB** | 2B turbo | None (DiT only) | — | LM disabled by default; INT8 quantization + full CPU offload |
-| **6-8GB** | 2B turbo | `acestep-5Hz-lm-0.6B` | `pt` | Lightweight LM with PyTorch backend |
-| **8-16GB** | 2B turbo/sft | `acestep-5Hz-lm-0.6B` / `1.7B` | `vllm` | 0.6B for 8-12GB, 1.7B for 12-16GB |
-| **16-20GB** | 2B sft or XL turbo | `acestep-5Hz-lm-1.7B` | `vllm` | XL requires CPU offload below 20GB |
-| **20-24GB** | XL turbo/sft | `acestep-5Hz-lm-1.7B` | `vllm` | XL fits without offload; 4B LM available |
-| **≥24GB** | XL sft (or xl-base for extract/lego/complete) | `acestep-5Hz-lm-4B` | `vllm` | Best quality, all models fit without offload |
+### Storage Requirements
 
-> **XL (4B) models** (`acestep-v15-xl-*`) offer higher audio quality with ~9GB VRAM for weights (vs ~4.7GB for 2B). They require ≥12GB VRAM (with offload + quantization) or ≥20GB (without offload). All LM models are fully compatible with XL.
+A complete **The Muser SCM** installation requires substantial disk space.
 
-The UI automatically selects the best configuration for your GPU. All settings (LM model, backend, offloading, quantization) are tier-aware and pre-configured.
+During fresh-installation testing, the complete working environment occupied
+approximately **43 GB** once The Muser SCM, ACE-Step SCM, Ollama, the
+orchestration model, Python environments, dependencies, and generation models
+were installed.
 
-> 📖 GPU compatibility details: [English](./docs/en/GPU_COMPATIBILITY.md) | [中文](./docs/zh/GPU_COMPATIBILITY.md) | [日本語](./docs/ja/GPU_COMPATIBILITY.md) | [한국어](./docs/ko/GPU_COMPATIBILITY.md)
+We recommend having at least **60 GB of free disk space** before beginning a
+new The Muser SCM installation.
 
-## 🚀 Launch Scripts
+The additional space provides room for installation overhead, package and
+model updates, temporary files, and generated music.
 
-Ready-to-use launch scripts for all platforms with auto environment detection, update checking, and dependency installation.
+> [!IMPORTANT]
+> The approximately 43 GB figure is a measured result from our validated
+> installation, not a guaranteed fixed installation size. Actual disk usage
+> may vary as dependencies, models, and upstream components change.
 
-| Platform | Scripts | Backend |
-|----------|---------|---------|
-| **Windows** | `start_gradio_ui.bat`, `start_api_server.bat` | CUDA |
-| **Windows (ROCm)** | `start_gradio_ui_rocm.bat`, `start_api_server_rocm.bat` | AMD ROCm |
-| **Linux** | `start_gradio_ui.sh`, `start_api_server.sh` | CUDA |
-| **macOS** | `start_gradio_ui_macos.sh`, `start_api_server_macos.sh` | MLX (Apple Silicon) |
 
-```bash
-# Windows
-start_gradio_ui.bat
+## For Developers
 
-# Linux
-chmod +x start_gradio_ui.sh && ./start_gradio_ui.sh
+Direct installation and startup of ACE-Step SCM is intended primarily for
+development, testing, and maintenance of The Muser SCM integration.
 
-# macOS (Apple Silicon)
-chmod +x start_gradio_ui_macos.sh && ./start_gradio_ui_macos.sh
+Normal users of The Muser SCM should use `Start_Muser.bat` instead.
+
+### SCM Environment Setup
+
+From the ACE-Step SCM repository root, the SCM environment can be prepared
+with:
+
+```bat
+scripts\scm\bootstrap_scm_environment.bat
 ```
 
-### ⚙️ Customizing Launch Settings
+The bootstrap process creates the dedicated `.venv-scm` environment and
+installs the dependencies and compatibility patches used by the
+ACE-Step SCM environment.
 
-**Recommended:** Create a `.env` file to customize models, ports, and other settings. Your `.env` configuration will survive repository updates.
+> [!IMPORTANT]
+> First-time setup may download several large dependencies and models.
+> Make sure sufficient disk space is available before running the bootstrap
+> process.
 
-```bash
-# Copy the example file
-cp .env.example .env
+### Starting the SCM API
 
-# Edit with your preferred settings
-# Examples in .env:
-ACESTEP_CONFIG_PATH=acestep-v15-turbo
-ACESTEP_LM_MODEL_PATH=acestep-5Hz-lm-1.7B
-PORT=7860
-LANGUAGE=en
+The ACE-Step SCM REST API used by The Muser SCM can be started directly with:
+
+```bat
+scripts\scm\start_api_server_scm.bat
 ```
 
-> 📖 **Script configuration & customization:** [English](./docs/en/INSTALL.md#-launch-scripts) | [中文](./docs/zh/INSTALL.md#-启动脚本) | [日本語](./docs/ja/INSTALL.md#-起動スクリプト)
+The API listens on port `8001` by default.
 
-## 📚 Documentation
+When started through The Muser SCM, these environment and API-management
+steps are handled automatically by The Muser SCM startup workflow.
 
-### Usage Guides
+### Development Scope
 
-| Method | Description | Documentation |
-|--------|-------------|---------------|
-| 🖥️ **Gradio Web UI** | Interactive web interface for music generation | [Guide](./docs/en/GRADIO_GUIDE.md) |
-| 🧭 **UI Support Baseline** | Supported UI boundary and future UI parity checklist | [Guide](./docs/en/UI_SUPPORT.md) |
-| 🎛️ **VST3 Plugin** | Standalone VST3 plugin (C++/GGML) for DAW integration | [acestep.vst3](https://github.com/ace-step/acestep.vst3) |
-| 🐍 **Python API** | Programmatic access for integration | [Guide](./docs/en/INFERENCE.md) |
-| 🌐 **REST API** | HTTP-based async API for services | [Guide](./docs/en/API.md) |
-| ⌨️ **CLI** | Interactive wizard and configuration | [Guide](./docs/en/CLI.md) |
+Changes to ACE-Step SCM should be made with The Muser SCM integration in mind.
 
-### Setup & Configuration
+When modifying the SCM environment, dependencies, compatibility patches,
+hardware detection, model configuration, or API behavior, validate the
+affected workflow through The Muser SCM whenever practical.
 
-| Topic | Documentation |
-|-------|---------------|
-| 📦 Installation (all platforms) | [English](./docs/en/INSTALL.md) \| [中文](./docs/zh/INSTALL.md) \| [日本語](./docs/ja/INSTALL.md) |
-| 🎮 GPU Compatibility | [English](./docs/en/GPU_COMPATIBILITY.md) \| [中文](./docs/zh/GPU_COMPATIBILITY.md) \| [日本語](./docs/ja/GPU_COMPATIBILITY.md) |
-| 🔧 GPU Troubleshooting | [English](./docs/en/GPU_TROUBLESHOOTING.md) |
-| 🔬 Benchmark & Profiling | [English](./docs/en/BENCHMARK.md) \| [中文](./docs/zh/BENCHMARK.md) |
-
-### Multi-Language Docs
-
-| Language | API | Gradio | Inference | Tutorial | LoRA Training | Install | Benchmark |
-|----------|-----|--------|-----------|----------|---------------|---------|-----------|
-| 🇺🇸 English | [Link](./docs/en/API.md) | [Link](./docs/en/GRADIO_GUIDE.md) | [Link](./docs/en/INFERENCE.md) | [Link](./docs/en/Tutorial.md) | [Link](./docs/en/LoRA_Training_Tutorial.md) | [Link](./docs/en/INSTALL.md) | [Link](./docs/en/BENCHMARK.md) |
-| 🇨🇳 中文 | [Link](./docs/zh/API.md) | [Link](./docs/zh/GRADIO_GUIDE.md) | [Link](./docs/zh/INFERENCE.md) | [Link](./docs/zh/Tutorial.md) | [Link](./docs/zh/LoRA_Training_Tutorial.md) | [Link](./docs/zh/INSTALL.md) | [Link](./docs/zh/BENCHMARK.md) |
-| 🇯🇵 日本語 | [Link](./docs/ja/API.md) | [Link](./docs/ja/GRADIO_GUIDE.md) | [Link](./docs/ja/INFERENCE.md) | [Link](./docs/ja/Tutorial.md) | [Link](./docs/ja/LoRA_Training_Tutorial.md) | [Link](./docs/ja/INSTALL.md) | — |
-| 🇰🇷 한국어 | [Link](./docs/ko/API.md) | [Link](./docs/ko/GRADIO_GUIDE.md) | [Link](./docs/ko/INFERENCE.md) | [Link](./docs/ko/Tutorial.md) | [Link](./docs/ko/LoRA_Training_Tutorial.md) | — | — |
-
-## 📖 Tutorial
-
-**🎯 Must Read:** Comprehensive guide to ACE-Step 1.5's design philosophy and usage methods.
-
-| Language | Link |
-|----------|------|
-| 🇺🇸 English | [English Tutorial](./docs/en/Tutorial.md) |
-| 🇨🇳 中文 | [中文教程](./docs/zh/Tutorial.md) |
-| 🇯🇵 日本語 | [日本語チュートリアル](./docs/ja/Tutorial.md) |
-
-This tutorial covers: mental models and design philosophy, model architecture and selection, input control (text and audio), inference hyperparameters, random factors and optimization strategies.
-
-## 🔨 Train
-
-📖 **LoRA Training Tutorial** — step-by-step guide covering data preparation, annotation, preprocessing, and training:
-
-| Language | Link |
-|----------|------|
-| 🇺🇸 English | [LoRA Training Tutorial](./docs/en/LoRA_Training_Tutorial.md) |
-| 🇨🇳 中文 | [LoRA 训练教程](./docs/zh/LoRA_Training_Tutorial.md) |
-| 🇯🇵 日本語 | [LoRA トレーニングチュートリアル](./docs/ja/LoRA_Training_Tutorial.md) |
-| 🇰🇷 한국어 | [LoRA 학습 튜토리얼](./docs/ko/LoRA_Training_Tutorial.md) |
-
-See also the **LoRA Training** tab in Gradio UI for one-click training, or [Gradio Guide - LoRA Training](./docs/en/GRADIO_GUIDE.md#lora-training) for UI reference.
-
-🔧 **Advanced Training with [Side-Step](https://github.com/koda-dernet/Side-Step)** — CLI-based training toolkit with corrected timestep sampling, LoKR adapters, VRAM optimization, gradient sensitivity analysis, and more. See the [Side-Step documentation](./docs/sidestep/Getting%20Started.md).
-
-## 🏗️ Architecture
-
-<p align="center">
-    <img src="./assets/ACE-Step_framework.png" width="100%" alt="ACE-Step Framework">
-</p>
-
-## 🦁 Model Zoo
-
-<p align="center">
-    <img src="./assets/model_zoo.png" width="100%" alt="Model Zoo">
-</p>
-
-### DiT Models
-
-| DiT Model | Pre-Training | SFT | RL | CFG | Step | Refer audio | Text2Music | Cover | Repaint | Extract | Lego | Complete | Quality | Diversity | Fine-Tunability | Hugging Face |
-|-----------|:------------:|:---:|:--:|:---:|:----:|:-----------:|:----------:|:-----:|:-------:|:-------:|:----:|:--------:|:-------:|:---------:|:---------------:|--------------|
-| `acestep-v15-base` | ✅ | ❌ | ❌ | ✅ | 50 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Medium | High | Easy | [Link](https://huggingface.co/ACE-Step/acestep-v15-base) |
-| `acestep-v15-sft` | ✅ | ✅ | ❌ | ✅ | 50 | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | High | Medium | Easy | [Link](https://huggingface.co/ACE-Step/acestep-v15-sft) |
-| `acestep-v15-turbo` | ✅ | ✅ | ❌ | ❌ | 8 | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | Very High | Medium | Medium | [Link](https://huggingface.co/ACE-Step/Ace-Step1.5) |
-
-### XL (4B) DiT Models
-
-> XL models use a larger 4B-parameter DiT decoder (~9GB bf16) for higher audio quality. They require ≥12GB VRAM (with offload + quantization) or ≥20GB (without offload). All LM models are fully compatible.
-
-| DiT Model | Pre-Training | SFT | RL | CFG | Step | Refer audio | Text2Music | Cover | Repaint | Extract | Lego | Complete | Quality | Diversity | Fine-Tunability | Hugging Face |
-|-----------|:------------:|:---:|:--:|:---:|:----:|:-----------:|:----------:|:-----:|:-------:|:-------:|:----:|:--------:|:-------:|:---------:|:---------------:|--------------|
-| `acestep-v15-xl-base` | ✅ | ❌ | ❌ | ✅ | 50 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | High | High | Easy | [Link](https://huggingface.co/ACE-Step/acestep-v15-xl-base) |
-| `acestep-v15-xl-sft` | ✅ | ✅ | ❌ | ✅ | 50 | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | Very High | Medium | Easy | [Link](https://huggingface.co/ACE-Step/acestep-v15-xl-sft) |
-| `acestep-v15-xl-turbo` | ✅ | ✅ | ❌ | ❌ | 8 | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | Very High | Medium | Medium | [Link](https://huggingface.co/ACE-Step/acestep-v15-xl-turbo) |
-
-### LM Models
-
-| LM Model | Pretrain from | Pre-Training | SFT | RL | CoT metas | Query rewrite | Audio Understanding | Composition Capability | Copy Melody | Hugging Face |
-|----------|---------------|:------------:|:---:|:--:|:---------:|:-------------:|:-------------------:|:----------------------:|:-----------:|--------------|
-| `acestep-5Hz-lm-0.6B` | Qwen3-0.6B | ✅ | ✅ | ✅ | ✅ | ✅ | Medium | Medium | Weak | ✅ |
-| `acestep-5Hz-lm-1.7B` | Qwen3-1.7B | ✅ | ✅ | ✅ | ✅ | ✅ | Medium | Medium | Medium | ✅ |
-| `acestep-5Hz-lm-4B` | Qwen3-4B | ✅ | ✅ | ✅ | ✅ | ✅ | Strong | Strong | Strong | ✅ |
-
-## 🔬 Benchmark
-
-ACE-Step 1.5 includes `profile_inference.py`, a profiling & benchmarking tool that measures LLM, DiT, and VAE timing across devices and configurations.
-
-```bash
-python profile_inference.py                        # Single-run profile
-python profile_inference.py --mode benchmark       # Configuration matrix
-```
-
-> 📖 **Full guide** (all modes, CLI options, output interpretation): [English](./docs/en/BENCHMARK.md) | [中文](./docs/zh/BENCHMARK.md)
-
-## 📜 License & Disclaimer
-
-This project is licensed under [MIT](./LICENSE)
-
-ACE-Step enables original music generation across diverse genres, with applications in creative production, education, and entertainment. While designed to support positive and artistic use cases, we acknowledge potential risks such as unintentional copyright infringement due to stylistic similarity, inappropriate blending of cultural elements, and misuse for generating harmful content. To ensure responsible use, we encourage users to verify the originality of generated works, clearly disclose AI involvement, and obtain appropriate permissions when adapting protected styles or materials. By using ACE-Step, you agree to uphold these principles and respect artistic integrity, cultural diversity, and legal compliance. The authors are not responsible for any misuse of the model, including but not limited to copyright violations, cultural insensitivity, or the generation of harmful content.
-
-🔔 Important Notice  
-The only official website for the ACE-Step project is our GitHub Pages site.    
- We do not operate any other websites.  
-🚫 Fake domains include but are not limited to:
-ac\*\*p.com, a\*\*p.org, a\*\*\*c.org  
-⚠️ Please be cautious. Do not visit, trust, or make payments on any of those sites.
-
-## 🌐 Community & Ecosystem
-
-Check out **[Awesome ACE-Step](https://github.com/ace-step/awesome-ace-step)** — a curated list of community projects, alternative UIs, ComfyUI nodes, cloud deployments, training tools, and more built around ACE-Step.
-
-## 🙏 Acknowledgements
-
-This project is co-led by ACE Studio and StepFun.
+The broader ACE-Step project supports platforms and workflows beyond those
+validated by The Shadow Collective. SCM-specific changes should avoid altering
+unrelated upstream behavior unless a change is required for The Muser SCM 
+integration.
 
 
-## 📖 Citation
+## Upstream ACE-Step Documentation
 
-If you find this project useful for your research, please consider citing:
+ACE-Step SCM is maintained for integration with The Muser SCM and does not
+attempt to duplicate the complete documentation of the original ACE-Step
+project.
 
-```BibTeX
+For standalone ACE-Step installation, supported platforms, model selection,
+training, inference, user interfaces, API documentation, tutorials, and
+general ACE-Step usage, please refer to the original project:
+
+**ACE-Step 1.5:**  
+https://github.com/ace-step/ACE-Step-1.5
+
+The upstream documentation should be considered authoritative for original
+ACE-Step functionality that has not been specifically modified or documented
+by the SCM fork.
+
+If behavior differs between ACE-Step SCM and the original ACE-Step project,
+the SCM documentation applies only to the SCM-specific integration and
+environment maintained for The Muser SCM.
+
+
+## License & Attribution
+
+ACE-Step SCM is derived from the original **ACE-Step 1.5** project and
+continues to be distributed under the terms of the repository's
+[MIT License](./LICENSE).
+
+The original ACE-Step project, research, models, architecture, and core
+implementation were created by the ACE-Step team and their contributors.
+ACE-Step is co-led by **ACE Studio** and **StepFun**.
+
+The Shadow Collective's contributions to this fork consist of modifications
+made for compatibility, integration, environment management, and maintenance
+required by The Muser SCM.
+
+Nothing in the ACE-Step SCM name or documentation is intended to imply that
+The Shadow Collective created the original ACE-Step project or is affiliated
+with, endorsed by, or acting on behalf of the original ACE-Step developers.
+
+Please preserve the original copyright, license, attribution, and third-party
+notices when redistributing this software.
+
+## Original ACE-Step Citation
+
+If you use ACE-Step or ACE-Step SCM in research or other work where citation
+is appropriate, please credit the original ACE-Step authors:
+
+```bibtex
 @misc{gong2026acestep,
-	title={ACE-Step 1.5: Pushing the Boundaries of Open-Source Music Generation},
-	author={Junmin Gong, Yulin Song, Wenxiao Zhao, Sen Wang, Shengyuan Xu, Jing Guo}, 
-	howpublished={\url{https://github.com/ace-step/ACE-Step-1.5}},
-	year={2026},
-	note={GitHub repository}
+    title={ACE-Step 1.5: Pushing the Boundaries of Open-Source Music Generation},
+    author={Junmin Gong, Yulin Song, Wenxiao Zhao, Sen Wang, Shengyuan Xu, Jing Guo},
+    howpublished={\url{https://github.com/ace-step/ACE-Step-1.5}},
+    year={2026},
+    note={GitHub repository}
 }
 ```
+
+ACE-Step SCM would not exist without the work of the original ACE-Step
+developers and contributors. We are grateful that their work was made
+available to the open-source community.

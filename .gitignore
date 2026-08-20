@@ -150,6 +150,8 @@ celerybeat.pid
 .env
 .envrc
 .venv
+.venv-scm
+.venv-scm/
 env/
 venv/
 ENV/
