@@ -86,6 +86,7 @@ class GenerateMusicRequest(BaseModel):
     extract_codes_only: bool = False
 
     use_adg: bool = False
+    dcw_enabled: Optional[bool] = None
     cfg_interval_start: float = 0.0
     cfg_interval_end: float = 1.0
     infer_method: str = "ode"  # "ode" or "sde" - diffusion inference method

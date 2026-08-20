@@ -14,6 +14,156 @@ from .init_service_loader_components import InitServiceLoaderComponentsMixin
 class InitServiceLoaderMixin(InitServiceLoaderComponentsMixin):
     """Helpers for heavy model component loading."""
 
+    def _repair_vector_quantize_buffers(self) -> None:
+        """Rebuild derived buffers corrupted by Transformers 5 meta initialization."""
+        try:
+            quantizer = self.model.tokenizer.quantizer
+        except Exception:
+            return
+
+        try:
+            levels = list(quantizer.levels)
+
+            # -------------------------------------------------------------
+            # ResidualFSQ scales
+            # -------------------------------------------------------------
+
+            levels_f32 = torch.tensor(
+                levels,
+                dtype=torch.float32,
+                device=quantizer.scales.device,
+            )
+
+            quantizer.scales = torch.stack(
+                [
+                    levels_f32 ** -i
+                    for i in range(quantizer.num_quantizers)
+                ]
+            )
+
+            # -------------------------------------------------------------
+            # ResidualFSQ soft clamp
+            #
+            # Original construction occurs in model dtype. For BF16 models
+            # this rounding is significant and must be preserved.
+            # -------------------------------------------------------------
+
+            clamp_device = quantizer.soft_clamp_input_value.device
+
+            levels_model_dtype = torch.tensor(
+                levels,
+                dtype=self.dtype,
+                device=clamp_device,
+            )
+
+            one = torch.tensor(
+                1.0,
+                dtype=self.dtype,
+                device=clamp_device,
+            )
+
+            quantizer.soft_clamp_input_value = (
+                one + (one / (levels_model_dtype - one))
+            )
+
+            # -------------------------------------------------------------
+            # FSQ layer derived buffers
+            # -------------------------------------------------------------
+
+            for fsq in quantizer.layers:
+                device = fsq._basis.device
+
+                fsq._levels = torch.tensor(
+                    levels,
+                    dtype=torch.int32,
+                    device=device,
+                )
+
+                fsq._basis = torch.cumprod(
+                    torch.tensor(
+                        [1] + levels[:-1],
+                        dtype=torch.int32,
+                        device=device,
+                    ),
+                    dim=0,
+                )
+
+                if hasattr(fsq, "implicit_codebook"):
+                    idx = torch.arange(
+                        fsq.codebook_size,
+                        device=device,
+                    )
+
+                    level_indices = fsq.indices_to_level_indices(idx).to(
+                        self.dtype
+                    )
+
+                    level_values = fsq._levels.to(self.dtype)
+
+                    two = torch.tensor(
+                        2.0,
+                        dtype=self.dtype,
+                        device=device,
+                    )
+
+                    one = torch.tensor(
+                        1.0,
+                        dtype=self.dtype,
+                        device=device,
+                    )
+
+                    fsq.implicit_codebook = (
+                        level_indices
+                        * (two / (level_values - one))
+                        - one
+                    )
+
+            logger.warning(
+                "[initialize_service] Rebuilt ResidualFSQ derived buffers after meta initialization"
+            )
+
+            # -------------------------------------------------------------
+            # Qwen3 rotary embeddings
+            #
+            # Transformers 5 meta construction can leave persistent=False
+            # RoPE buffers materialized with uninitialized data. Constructing
+            # a fresh rotary module after loading produces the correct values.
+            # -------------------------------------------------------------
+
+            rotary_repairs = 0
+
+            for module in self.model.modules():
+                if module.__class__.__name__ != "Qwen3RotaryEmbedding":
+                    continue
+
+                device = module.inv_freq.device
+
+                fresh_rotary = module.__class__(
+                    config=self.model.config,
+                    device=device,
+                )
+
+                module.inv_freq = fresh_rotary.inv_freq.to(device)
+
+                if hasattr(module, "original_inv_freq"):
+                    if hasattr(fresh_rotary, "original_inv_freq"):
+                        module.original_inv_freq = (
+                            fresh_rotary.original_inv_freq.to(device)
+                        )
+                    else:
+                        module.original_inv_freq = module.inv_freq.clone()
+
+                rotary_repairs += 1
+
+            logger.warning(
+                f"[initialize_service] Rebuilt {rotary_repairs} Qwen3 rotary embedding buffers after meta initialization"
+            )
+
+        except Exception as exc:
+            logger.warning(
+                f"[initialize_service] Derived buffer repair skipped: {exc}"
+            )
+
     def _cuda_supports_bool_argsort(self) -> bool:
         """Return whether CUDA argsort supports bool tensors on the active device."""
         if not torch.cuda.is_available():
@@ -189,6 +339,7 @@ class InitServiceLoaderMixin(InitServiceLoaderComponentsMixin):
                 f"Failed to load model with attention implementations {attn_candidates}: {last_attn_error}"
             ) from last_attn_error
 
+        self._repair_vector_quantize_buffers()
         self.model.config._attn_implementation = attn_implementation
         self.config = self.model.config
         self._sync_alignment_config()

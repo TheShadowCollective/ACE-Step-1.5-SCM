@@ -77,6 +77,7 @@ def build_generate_music_request(
         repaint_mode=parser.str("repaint_mode", "balanced"),
         repaint_strength=parser.float("repaint_strength", 0.5),
         use_adg=parser.bool("use_adg"),
+        dcw_enabled=parser.get("dcw_enabled"),
         cfg_interval_start=parser.float("cfg_interval_start", 0.0),
         cfg_interval_end=parser.float("cfg_interval_end", 1.0),
         infer_method=parser.str("infer_method", "ode"),
